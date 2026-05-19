@@ -179,20 +179,20 @@
                 if (isLocalhost) {
                     // سيرفرات التطوير المحلي المستقرة (تخطي حظر X-Frame-Options)
                     if (serverKey === 'server1') {
-                        targetUrl = isTv ? `https://vidsrc.pm/embed/tv/${mediaId}/${seasonNum}/${episodeNum}` : `https://vidsrc.pm/embed/movie/${mediaId}`;
+                        targetUrl = isTv ? `//vidsrc.pm/embed/tv/${mediaId}/${seasonNum}/${episodeNum}` : `https://vidsrc.pm/embed/movie/${mediaId}`;
                     } else if (serverKey === 'server2') {
-                        targetUrl = isTv ? `https://vidsrc.xyz/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc.xyz/embed/movie?tmdb=${mediaId}`;
+                        targetUrl = isTv ? `//vidsrc.xyz/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc.xyz/embed/movie?tmdb=${mediaId}`;
                     } else if (serverKey === 'server3') {
-                        targetUrl = isTv ? `https://autoembed.co/movie/tmdb/${mediaId}?s=${seasonNum}&e=${episodeNum}` : `https://autoembed.co/movie/tmdb/${mediaId}`;
+                        targetUrl = isTv ? `//autoembed.co/movie/tmdb/${mediaId}?s=${seasonNum}&e=${episodeNum}` : `https://autoembed.co/movie/tmdb/${mediaId}`;
                     }
                 } else {
                     // سيرفرات البث الاحترافية أونلاين عند رفع الموقع على استضافة ودومين رسمي
                     if (serverKey === 'server1') {
-                        targetUrl = isTv ? `https://vidsrcme.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.ru/embed/movie?tmdb=${mediaId}`;
+                        targetUrl = isTv ? `//vidsrcme.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.ru/embed/movie?tmdb=${mediaId}`;
                     } else if (serverKey === 'server2') {
-                        targetUrl = isTv ? `https://vidsrcme.su/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.su/embed/movie?tmdb=${mediaId}`;
+                        targetUrl = isTv ? `//vidsrcme.su/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.su/embed/movie?tmdb=${mediaId}`;
                     } else if (serverKey === 'server3') {
-                        targetUrl = isTv ? `https://vidsrc-me.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc-me.ru/embed/movie?tmdb=${mediaId}`;
+                        targetUrl = isTv ? `//vidsrc-me.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc-me.ru/embed/movie?tmdb=${mediaId}`;
                     }
                 }
                 
