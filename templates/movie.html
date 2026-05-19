@@ -57,6 +57,20 @@
     .media-details { flex-direction: column; text-align: center; } /* جعل تفاصيل الفيلم تحت بعضها */
     .episodes-grid { grid-template-columns: 1fr !important; } /* جعل الحلقات عمود واحد */
 }
+        <style>
+    /* أضف هذا الكود في أول قسم الـ style */
+    @media (max-width: 600px) {
+        body, .video-container, .navbar, .player-box, .media-details {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+            box-sizing: border-box !important;
+        }
+    }
+    /* ... باقي الكود الخاص بك ... */
+</style>
     </style>
 </head>
 <body>
