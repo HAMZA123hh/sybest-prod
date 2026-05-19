@@ -229,11 +229,12 @@ def movie_detail(movie_id):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&language=ar-SA"
     movie_info = requests.get(url, timeout=15).json() if requests.get(url).status_code == 200 else {}
     
-    # تحويل ذكي ومتكيف بالكامل بحسب بيئة التشغيل
+    # تحويل ذكي ومتكيف بالكامل بحسب بيئة التشغيل مع إجبار جلب الترجمة العربية أونلاين
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
         embed_url = "//vidsrc.pm/embed/movie/{movie_id}"  # سيرفر التطوير المحلي المفتوح
     else:
-        embed_url = "//vidsrc.xyz/embed/movie?tmdb={movie_id}" # السيرفر الافتراضي المستقر جداً أونلاين
+        # تمت إضافة sub_language=ar هنا لضمان الترجمة العربية للأفلام
+        embed_url = "//vidsrc.xyz/embed/movie?tmdb={movie_id}&sub_language=ar" 
         
     return render_template('movie.html', embed_url=embed_url, is_tv=False, media=movie_info)
 
@@ -272,12 +273,13 @@ def tv_detail(tv_id, season=1, episode=1):
             next_season = None
             next_episode = None
 
-    # تحويل ذكي ومتكيف بالكامل بحسب بيئة التشغيل للمسلسلات
+    # تحويل ذكي ومتكيف بحسب بيئة التشغيل للمسلسلات مع جلب الترجمة العربية أونلاين
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
         embed_url = "//vidsrc.pm/embed/tv/{tv_id}/{season}/{episode}"
     else:
-        # هنا أيضاً استخدمنا // مع vidsrc.net لضمان العمل
-        embed_url = "//vidsrc.net/embed/tv?tmdb={tv_id}&season={season}&episode={episode}"
+        # تمت إضافة sub_language=ar هنا لضمان الترجمة العربية للمسلسلات
+        embed_url = "//vidsrc.net/embed/tv?tmdb={tv_id}&season={season}&episode={episode}&sub_language=ar"
+        
     return render_template(
         'movie.html', 
         embed_url=embed_url, 
