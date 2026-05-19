@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sy-Best - المنصة المميزة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #141414; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        .navbar { background-color: #000000; border-bottom: 3px solid #e50914; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { color: #e50914; font-weight: bold; font-size: 26px; text-decoration: none; }
+        
+        /* 🌟 كلاس تنسيق زر الـ Feedback الجديد والمطور */
+        .btn-feedback {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+            background: #1a1a1a;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            margin-left: auto;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+        
+        /* تأثير الحركة الرائع والتوهج عند تمرير الماوس */
+        .btn-feedback:hover {
+            color: #fff;
+            background: #e50914;
+            border-color: #e50914;
+            box-shadow: 0 0 12px rgba(229, 9, 20, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        /* حركة الاهتزاز الخفيفة للأيقونة عند الـ Hover */
+        .btn-feedback:hover i {
+            animation: wobble 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes wobble {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(15deg); }
+        }
+
+        .search-container { position: relative; display: flex; align-items: center; }
+        .search-input { padding: 10px 15px; border: 1px solid #333; background-color: #111; color: #fff; border-radius: 4px; outline: none; width: 250px; font-size: 14px; text-align: right; }
+        .live-search-results { position: absolute; top: 100%; right: 0; width: 330px; background-color: #0c0c0c; border: 1px solid #222; border-radius: 4px; max-height: 350px; overflow-y: auto; display: none; z-index: 200; margin-top: 5px; text-align: right; }
+        .search-item { display: flex; gap: 12px; padding: 10px; border-bottom: 1px solid #1a1a1a; text-decoration: none; color: #fff; font-size: 13px; align-items: center; }
+        .search-item img { width: 40px; height: 55px; object-fit: cover; border-radius: 4px; }
+        
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .btn-vip { background-color: #ffc107; color: #000; padding: 8px 16px; border-radius: 4px; font-weight: bold; text-decoration: none; font-size: 13px; transition: 0.2s; }
+        .btn-vip:hover { background-color: #e0a800; }
+        .btn-logout, .btn-login { color: #fff; text-decoration: none; font-size: 14px; background: #222; padding: 8px 14px; border-radius: 4px; transition: 0.2s; }
+        .btn-logout:hover, .btn-login:hover { background: #333; }
+        
+        /* شريط الأقسام الكبرى المضافة حديثاً */
+        .category-bar { background-color: #0a0a0a; padding: 15px 30px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; border-bottom: 1px solid #222; }
+        .cat-btn { background: #1f1f1f; color: #ccc; border: 1px solid #333; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        .cat-btn.active { background: #e50914; color: #fff; border-color: #e50914; }
+
+        /* شريط فئات الأفلام الأصلي */
+        .genres-bar { background-color: #080808; padding: 10px 30px; display: flex; gap: 15px; overflow-x: auto; border-bottom: 1px solid #1a1a1a; }
+        .genre-btn { background: #151515; color: #aaa; border: 1px solid #252525; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; white-space: nowrap; transition: 0.2s; }
+        .genre-btn.active { background: #fff; color: #000; border-color: #fff; }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .flash-messages { background: #28a745; color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-weight: bold; text-align: center; font-size: 15px; }
+        
+        h2 { border-right: 4px solid #e50914; border-left: none; padding-right: 10px; padding-left: 0; margin: 40px 0 20px 0; font-size: 24px; color: #fff; }
+        .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
+        
+        .movie-card { background-color: #1f1f1f; border-radius: 8px; overflow: hidden; position: relative; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
+        .movie-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 10px 22px rgba(229, 9, 20, 0.4); }
+        
+        .poster-container { width: 100%; height: 270px; background-color: #2a2a2a; position: relative; overflow: hidden; }
+        .movie-poster { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .movie-card:hover .movie-poster { transform: scale(1.06); }
+        
+        .play-hover-btn { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; z-index: 2; pointer-events: none; }
+        .play-hover-btn span { background: #e50914; color: #fff; padding: 10px 16px; border-radius: 50px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.5); transform: scale(0.8); transition: transform 0.3s ease; }
+        .movie-card:hover .play-hover-btn { opacity: 1; }
+        .movie-card:hover .play-hover-btn span { transform: scale(1); }
+
+        .movie-info { padding: 12px; text-align: center; margin-top: auto; }
+        .movie-title { font-size: 14px; font-weight: bold; color: #fff; text-decoration: none; display: block; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .rating-badge { background-color: #ffc107; color: #000; font-weight: bold; position: absolute; top: 10px; left: 10px; padding: 4px 8px; border-radius: 4px; font-size: 11px; z-index: 3; }
+        
+        .hero-banner-wrapper { width: 100%; max-width: 1200px; margin: 20px auto 0 auto; padding: 0 20px; box-sizing: border-box; display: none; }
+        .hero-slider { width: 100%; height: 420px; background-color: #000; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .hero-slide { width: 100%; height: 100%; background-size: cover; background-position: center top; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: center; text-align: right; }
+        .hero-slide.active { opacity: 1; z-index: 1; }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(20,20,20,0.95) 30%, rgba(20,20,20,0.7) 50%, rgba(0,0,0,0) 100%); z-index: 2; }
+        .hero-content { position: relative; z-index: 3; max-width: 550px; padding: 0 50px; }
+        .hero-badge { background: #e50914; color: #fff; font-size: 12px; font-weight: bold; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-bottom: 15px; letter-spacing: 1px; }
+        .hero-title { font-size: 36px; font-weight: bold; margin: 0 0 15px 0; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .hero-overview { font-size: 15px; color: #ddd; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .btn-hero-play { background: #fff; color: #000; font-weight: bold; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+        .btn-hero-play:hover { background: #e50914; color: #fff; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 40px 0; }
+        .page-btn { background: #e50914; color: #fff; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .page-btn:disabled { background: #333; color: #777; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <a class="navbar-brand" href="/">Sy-Best</a>
+        
+        <a href="/feedback" class="btn-feedback">
+            <i class="fa-regular fa-paper-plane"></i> أرسل رأيك
+        </a>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchQuery" oninput="liveSearch()" placeholder="ابحث عن فيلم أو مسلسل..." autocomplete="off">
+            <div class="live-search-results" id="liveSearchResults"></div>
+        </div>
+
+        <div class="user-menu" style="margin-right: 20px;">
+            {% if current_user.is_authenticated %}
+                <span style="font-size: 14px;">أهلاً بك، <b>{{ current_user.username }}</b> 
+                    <span style="color:#ffc107">
+                        ({% if current_user.subscription == 'free' %}مجاني{% elif current_user.subscription == 'vip' %}VIP💎{% else %}معلق⏳{% endif %})
+                    </span>
+                </span>
+                {% if current_user.subscription == 'free' %}
+                    <a href="/pay" class="btn-vip">💎 ترقية إلى VIP</a>
+                {% elif current_user.subscription == 'pending' %}
+                    <span style="color: #aaa; font-size: 13px;">⏳ جاري التحقق من الدفع...</span>
+                {% endif %}
+                <a href="/logout" class="btn-logout">تسجيل الخروج</a>
+            {% else %}
+                <a href="/login" class="btn-login">تسجيل الدخول / الاشتراك</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="category-bar">
+        <button class="cat-btn active" onclick="switchCategory('movies', this)">🎬 أفلام عالمية</button>
+        <button class="cat-btn" onclick="switchCategory('shows', this)">📺 مسلسلات عالمية</button>
+        <button class="cat-btn" onclick="switchCategory('arabic-movies', this)">🇸🇾 أفلام عربية</button>
+        <button class="cat-btn" onclick="switchCategory('arabic-shows', this)">🌙 مسلسلات عربية</button>
+        <button class="cat-btn" onclick="switchCategory('turkish-shows', this)">🇹🇷 دراما تركية</button>
+    </div>
+
+    <div class="genres-bar" id="genresBar">
+        <button class="genre-btn active" onclick="filterGenre('')">جميع الفئات</button>
+        <button class="genre-btn" onclick="filterGenre('28')">أكشن</button>
+        <button class="genre-btn" onclick="filterGenre('27')">رعب</button>
+        <button class="genre-btn" onclick="filterGenre('35')">كوميديا</button>
+        <button class="genre-btn" onclick="filterGenre('18')">دراما</button>
+        <button class="genre-btn" onclick="filterGenre('16')">أنميشن / أنمي</button>
+    </div>
+
+    <div class="hero-banner-wrapper" id="heroWrapper">
+        <div class="hero-slider" id="heroSlider"></div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% if category == 'error' %}
+                    <div class="flash-messages" style="background:#dc3545;">{{ message }}</div>
+                {% else %}
+                    <div class="flash-messages">{{ message }}</div>
+                {% endif %}
+            {% endif %}
+        {% endwith %}
+
+        <div id="mainSections">
+            <h2 id="sectionTitle">🔥 العروض الأكثر شعبية</h2>
+            <div class="movies-grid" id="moviesGrid"></div>
+            
+            <div class="pagination-container">
+                <button class="page-btn" id="moviePrev" onclick="changePage(-1)" disabled>السابق</button>
+                <span id="moviePageText">الصفحة 1</span>
+                <button class="page-btn" id="movieNext" onclick="changePage(1)">التالي</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentMoviePage = 1;
+        var selectedGenre = '';
+        var currentCategory = 'movies'; 
+        var heroInterval = null;
+
+        function liveSearch() {
+            var query = document.getElementById('searchQuery').value.trim();
+            var resultsBox = document.getElementById('liveSearchResults');
+            if (query.length < 2) { resultsBox.innerHTML = ""; resultsBox.style.display = 'none'; return; }
+
+            fetch("/api/search/" + query)
+                .then(res => res.json())
+                .then(data => {
+                    resultsBox.innerHTML = "";
+                    var items = data.results;
+                    if (!items || items.length === 0) {
+                        resultsBox.innerHTML = "<div style='padding:10px; color:#666;'>لم يتم العثور على نتائج.</div>";
+                        resultsBox.style.display = 'block'; return;
+                    }
+                    var limit = Math.min(items.length, 5);
+                    for (var i = 0; i < limit; i++) {
+                        var item = items[i]; if (!item.poster_path) continue;
+                        
+                        var title = "";
+                        var isMovieMode = (item.media_type === 'movie' || !item.first_air_date);
+                        if (isMovieMode) {
+                            title = item.original_title ? item.original_title : (item.title ? item.title : '');
+                        } else {
+                            title = item.original_name ? item.original_name : (item.name ? item.name : '');
+                        }
+                        
+                        var link = isMovieMode ? "/movie/" + item.id : "/tv/" + item.id;
+                        var typeBadge = isMovieMode ? "فيلم" : "مسلسل";
+                        
+                        resultsBox.innerHTML += '<a href="'+link+'" class="search-item">' +
+                            '<img src="https://image.tmdb.org/t/p/w92'+item.poster_path+'">' +
+                            '<div><b>'+title+'</b> <span style="font-size:10px; color:#aaa;">('+typeBadge+')</span><br><span style="color:#ffc107">★ '+item.vote_average.toFixed(1)+'</span></div>' +
+                        '</a>';
+                    }
+                    resultsBox.style.display = 'block';
+                });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.id !== 'searchQuery') document.getElementById('liveSearchResults').style.display = 'none';
+        });
+
+        function switchCategory(category, buttonElement) {
+            currentCategory = category;
+            currentMoviePage = 1;
+            selectedGenre = '';
+            
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+            
+            document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.genre-btn').classList.add('active');
+            
+            var genresBar = document.getElementById('genresBar');
+            if(category === 'arabic-movies' || category === 'arabic-shows' || category === 'turkish-shows') {
+                genresBar.style.display = 'none';
+            } else {
+                genresBar.style.display = 'flex';
+            }
+            
+            var titleBox = document.getElementById('sectionTitle');
+            if(category === 'movies') titleBox.innerText = "🔥 أفلام عالمية بارزة";
+            else if(category === 'shows') titleBox.innerText = "📺 مسلسلات عالمية بارزة";
+            else if(category === 'arabic-movies') titleBox.innerText = "🇸🇾 أفلام عربية حديثة";
+            else if(category === 'arabic-shows') titleBox.innerText = "🌙 مسلسلات عربية مميزة";
+            else if(category === 'turkish-shows') titleBox.innerText = "🇹🇷 أقوى الدراما التركية";
+
+            loadMovies();
+        }
+
+        function loadMovies() {
+            document.getElementById('moviesGrid').innerHTML = "";
+            
+            var endpoint = "/api/movies";
+            if (currentCategory === 'shows') endpoint = "/api/shows";
+            else if (currentCategory === 'arabic-movies') endpoint = "/api/arabic-movies";
+            else if (currentCategory === 'arabic-shows') endpoint = "/api/arabic-shows";
+            else if (currentCategory === 'turkish-shows') endpoint = "/api/turkish-shows";
+            
+            var url = endpoint + "?page=" + currentMoviePage + "&genre=" + selectedGenre;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    var grid = document.getElementById('moviesGrid');
+                    if(!data.results || data.results.length === 0) {
+                        grid.innerHTML = "<div style='padding:40px; color:#666; text-align:center; width:100%; grid-column: 1/-1;'>لا توجد عروض متوفرة حالياً في هذا القسم.</div>";
+                        document.getElementById('heroWrapper').style.display = 'none';
+                        return;
+                    }
+                    
+                    if (currentMoviePage === 1 && data.results.length > 0) {
+                        initHeroSlider(data.results);
+                    } else {
+                        document.getElementById('heroWrapper').style.display = 'none';
+                    }
+                    
+                    data.results.forEach(item => {
+                        if(!item.poster_path) return;
+                        
+                        var title = "";
+                        if (currentCategory === 'turkish-shows') {
+                            var arTitle = item.name || item.title;
+                            var originalTitle = item.original_name || item.original_title;
+                            if (arTitle.toLowerCase() === originalTitle.toLowerCase()) {
+                                title = arTitle;
+                            } else {
+                                title = arTitle + " (" + originalTitle + ")";
+                            }
+                        } else {
+                            title = item.title ? item.title : item.name;
+                        }
+                        
+                        var rating = item.vote_average ? item.vote_average.toFixed(1) : "0.0";
+                        var isShow = (currentCategory === 'shows' || currentCategory === 'arabic-shows' || currentCategory === 'turkish-shows');
+                        var playerUrl = isShow ? '/tv/' + item.id : '/movie/' + item.id;
+                        
+                        grid.innerHTML += '<div class="movie-card">' +
+                            '<span class="rating-badge">★ ' + rating + '</span>' +
+                            '<a href="' + playerUrl + '">' +
+                                '<div class="poster-container">' +
+                                    '<div class="play-hover-btn"><span>▶️ تشغيل سريع</span></div>' +
+                                    '<img src="https://image.tmdb.org/t/p/w500' + item.poster_path + '" class="movie-poster">' +
+                                '</div>' +
+                            '</a>' +
+                            '<div class="movie-info"><a href="' + playerUrl + '" class="movie-title" title="' + title + '">' + title + '</a></div>' +
+                        '</div>';
+                    });
+                    
+                    document.getElementById('moviePageText').innerText = "الصفحة " + currentMoviePage;
+                    document.getElementById('moviePrev').disabled = (currentMoviePage === 1);
+                });
+        }
+
+        function initHeroSlider(items) {
+            var sliderContainer = document.getElementById('heroSlider');
+            sliderContainer.innerHTML = "";
+            if(heroInterval) clearInterval(heroInterval);
+
+            var slideItems = items.filter(item => item.backdrop_path).slice(0, 4);
+            
+            if(slideItems.length === 0) {
+                document.getElementById('heroWrapper').style.display = 'none';
+                return;
+            }
+
+            var isShow = (currentCategory === 'shows' || currentCategory === 'arabic-shows' || currentCategory === 'turkish-shows');
+            var badgeText = isShow ? "مسلسل متميز" : "فيلم متميز";
+
+            slideItems.forEach((item, index) => {
+                var title = "";
+                if (isShow) {
+                    title = item.original_name ? item.original_name : (item.name ? item.name : '');
+                } else {
+                    title = item.original_title ? item.original_title : (item.title ? item.title : '');
+                }
+                
+                var overview = item.overview ? item.overview : "تابع أقوى تفاصيل هذا العمل الحصري والمميز بجودة عالية عبر مشغلنا الخاص بدون إعلانات.";
+                var playerUrl = isShow ? '/tv/' + item.id : '/movie/' + item.id;
+                var activeClass = index === 0 ? "active" : "";
+
+                sliderContainer.innerHTML += `
+                    <div class="hero-slide ${activeClass}" style="background-image: url('https://image.tmdb.org/t/p/original${item.backdrop_path}');">
+                        <div class="hero-overlay"></div>
+                        <div class="hero-content">
+                            <span class="hero-badge">✨ ${badgeText}</span>
+                            <h1 class="hero-title">${title}</h1>
+                            <p class="hero-overview">${overview}</p>
+                            <a href="${playerUrl}" class="btn-hero-play">🍿 شاهد الآن</a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('heroWrapper').style.display = 'block';
+
+            var slides = document.querySelectorAll('.hero-slide');
+            var currentSlide = 0;
+
+            heroInterval = setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 5000);
+        }
+
+        function changePage(step) { currentMoviePage += step; loadMovies(); window.scrollTo(0, 0); }
+        
+        function filterGenre(genreId) {
+            selectedGenre = genreId; 
+            currentMoviePage = 1;
+            document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadMovies();
+        }
+
+        window.onload = loadMovies;
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ media.title if media.title else media.name }} - Sy-Best Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #141414; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; text-align: center; direction: rtl; }
+        .navbar { background-color: #000; border-bottom: 3px solid #e50914; padding: 15px; text-align: right; }
+        .navbar a { color: #e50914; font-weight: bold; font-size: 24px; text-decoration: none; margin-right: 20px; }
+        .video-container { max-width: 1000px; margin: 30px auto; padding: 0 20px; text-align: right; }
+        
+        .media-details { background: #000; border: 1px solid #222; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; gap: 20px; align-items: center; text-align: right; }
+        .media-meta-img { width: 100px; height: 150px; border-radius: 4px; object-fit: cover; }
+        .media-text-box h1 { margin: 0 0 10px 0; font-size: 24px; }
+        
+        .servers-bar { background: #000; border: 1px solid #222; border-radius: 8px; padding: 12px 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; text-align: right; }
+        .servers-bar span { font-weight: bold; color: #aaa; font-size: 14px; }
+        .btn-server { background: #222; color: #fff; border: 1px solid #333; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-server:hover { background: #333; border-color: #e50914; }
+        .btn-server.active { background: #e50914; border-color: #e50914; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4); }
+
+        .player-box { width: 100%; height: 520px; background-color: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.7); position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        .paywall-box { background: #000; border: 2px dashed #ffc107; border-radius: 8px; padding: 50px 30px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .paywall-box h2 { color: #ffc107; font-size: 26px; margin-bottom: 15px; }
+        .paywall-box p { color: #ccc; font-size: 16px; margin-bottom: 25px; }
+        .btn-pay { background: #ffc107; color: #000; font-weight: bold; padding: 12px 30px; border-radius: 4px; text-decoration: none; font-size: 16px; transition: 0.2s; display: inline-block; }
+        .btn-pay:hover { background: #e0a800; }
+
+        .tv-controls { margin-top: 25px; background: #000; border: 1px solid #222; border-radius: 8px; padding: 20px; text-align: right; }
+        .seasons-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
+        .btn-season { background: #222; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; }
+        .btn-season.active { background: #e50914; }
+        
+        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
+        .episode-card { background: #111; border: 1px solid #222; border-radius: 6px; overflow: hidden; text-decoration: none; color: #fff; transition: 0.2s; display: block; text-align: right; }
+        .episode-card:hover { border-color: #e50914; background: #1a1a1a; }
+        .episode-card.active { border-color: #28a745; background: #0b2412; }
+        .episode-img { width: 100%; height: 120px; object-fit: cover; background: #222; display: block; }
+        .episode-info { padding: 10px; }
+        .episode-number { color: #ffc107; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+        .episode-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+
+        .next-episode-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .btn-next-ep { background: #28a745; color: #fff; font-weight: bold; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 14px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-next-ep:hover { background: #218838; }
+        .current-badge { background: #222; padding: 6px 12px; border-radius: 4px; font-size: 14px; color: #aaa; }
+        .current-badge b { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <a href="/">Sy-Best</a>
+    </header>
+
+    <div class="video-container">
+        <div class="media-details">
+            {% if media.poster_path %}
+                <img src="https://image.tmdb.org/t/p/w200{{ media.poster_path }}" class="media-meta-img">
+            {% endif %}
+            <div class="media-text-box">
+                <h1>{{ media.title if media.title else media.name }}</h1>
+                <p style="color: #ffc107; font-weight: bold; margin: 5px 0;">★ {{ "%.1f"|format(media.vote_average) if media.vote_average else '0.0' }}</p>
+                <p style="color: #aaa; font-size: 14px; margin: 0; line-height: 1.6;">{{ media.overview if media.overview else 'لا يوجد وصف متوفر حالياً لهذا العمل.' }}</p>
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated and current_user.subscription == 'vip' %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 13px; color: #00bcd4;">
+                    ⏳ ينتهي اشتراك الـ VIP الخاص بك بتاريخ: <b>{{ current_user.expire_date.strftime('%Y-%m-%d') }}</b>
+                </div>
+                
+                {% if is_tv %}
+                <div class="current-badge">
+                    أنت تشاهد الآن: <b>الموسم {{ current_season }} - الحلقة {{ current_episode }}</b>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if is_tv %}
+            <div class="next-episode-container">
+                <div></div> 
+                {% if next_season and next_episode %}
+                    <a href="/tv/{{ tv_id }}/{{ next_season }}/{{ next_episode }}" class="btn-next-ep">
+                        <span>الحلقة التالية ➔</span>
+                    </a>
+                {% else %}
+                    <span style="font-size: 13px; color: #666; font-weight: bold;">🎉 لقد وصلت إلى آخر حلقة متوفرة في المسلسل!</span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="servers-bar">
+                <span><i class="fa-solid fa-layer-group"></i> سيرفرات المشاهدة الاحتياطية (في حال الشاشة السوداء):</span>
+                <button class="btn-server active" onclick="switchDomain(this, 'default')"><i class="fa-solid fa-server"></i> السيرفر الافتراضي</button>
+                <button class="btn-server" onclick="switchDomain(this, 'server1')"><i class="fa-solid fa-bolt"></i> سيرفر بديل 1</button>
+                <button class="btn-server" onclick="switchDomain(this, 'server2')"><i class="fa-solid fa-bolt"></i> سيرفر بديل 2</button>
+                <button class="btn-server" onclick="switchDomain(this, 'server3')"><i class="fa-solid fa-bolt"></i> سيرفر بديل 3</button>
+            </div>
+
+            <div class="player-box">
+                <iframe id="syBestMainPlayer" src="{{ embed_url }}" allowfullscreen></iframe>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                <a href="/feedback?message_type=اقتراح/مشكلة&title={{ media.title if media.title else media.name }}{% if is_tv %}+الموسم+{{ current_season }}+الحلقة+{{ current_episode }}{% endif %}" style="background: #1a1a1a; color: #ffc107; font-weight: bold; padding: 8px 14px; border-radius: 4px; text-decoration: none; font-size: 13px; border: 1px solid #ffc107; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> هل واجهتك شاشة سوداء؟ أبلغ الإدارة فوراً
+                </a>
+            </div>
+
+            {% if is_tv %}
+            <div class="tv-controls">
+                <h3>🗂️ مواسم المسلسل</h3>
+                <div class="seasons-bar">
+                    {% for s in total_seasons %}
+                        <a href="/tv/{{ tv_id }}/{{ s }}/1" class="btn-season {% if s == current_season %}active{% endif %}">
+                            الموسم {{ s }}
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <h3>📺 حلقات الموسم {{ current_season }}</h3>
+                <div class="episodes-grid">
+                    {% for ep in episodes_detailed %}
+                        <a href="/tv/{{ tv_id }}/{{ current_season }}/{{ ep.episode_number }}" class="episode-card {% if ep.episode_number == current_episode %}active{% endif %}">
+                            {% if ep.still_path %}
+                                <img src="https://image.tmdb.org/t/p/w300{{ ep.still_path }}" class="episode-img" alt="حلقة {{ ep.episode_number }}">
+                            {% else %}
+                                <div class="episode-img" style="display: flex; align-items: center; justify-content: center; color: #444; font-size: 12px;">لا توجد صورة مصغرة</div>
+                            {% endif %}
+                            <div class="episode-info">
+                                <div class="episode-number">الحلقة {{ ep.episode_number }}</div>
+                                <h4 class="episode-title">{{ ep.name if ep.name else 'عنوان الحلقة غير متوفر' }}</h4>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <div class="paywall-box">
+                <h2>🔒 محتوى مخصص للمشتركين الـ VIP فقط</h2>
+                <p>هذا الفيلم أو المسلسل متاح حصرياً للباقة المميزة. اشترك الآن عبر سيريتل كاش أو شام كاش لفتح ميزة البث اللامحدود بأعلى جودة وبدون إعلانات!</p>
+                {% if not current_user.is_authenticated %}
+                    <a href="/login" class="btn-pay">تسجيل الدخول لفتح المشغل</a>
+                {% elif current_user.subscription == 'pending' %}
+                    <a href="#" class="btn-pay" style="background:#555; color:#fff; cursor:not-allowed; border: 1px solid #666;">⏳ طلبك قيد المراجعة والتدقيق حالياً</a>
+                {% else %}
+                    <a href="/pay" class="btn-pay">👑 ترقية الحساب إلى VIP الآن</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated and current_user.subscription == 'vip' %}
+    <script>
+        const defaultUrl = "{{ embed_url }}";
+        const isTv = {{ 'true' if is_tv else 'false' }};
+        
+        const mediaId = "{{ media.id }}";
+        const seasonNum = "{{ current_season if is_tv else 1 }}";
+        const episodeNum = "{{ current_episode if is_tv else 1 }}";
+
+        function switchDomain(buttonElement, serverKey) {
+            const player = document.getElementById('syBestMainPlayer');
+            const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+            
+            if (serverKey === 'default') {
+                player.src = defaultUrl;
+            } else {
+                let targetUrl = "";
+                
+                if (isLocalhost) {
+                    // سيرفرات التطوير المحلي المستقرة (تخطي حظر X-Frame-Options)
+                    if (serverKey === 'server1') {
+                        targetUrl = isTv ? `https://vidsrc.pm/embed/tv/${mediaId}/${seasonNum}/${episodeNum}` : `https://vidsrc.pm/embed/movie/${mediaId}`;
+                    } else if (serverKey === 'server2') {
+                        targetUrl = isTv ? `https://vidsrc.xyz/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc.xyz/embed/movie?tmdb=${mediaId}`;
+                    } else if (serverKey === 'server3') {
+                        targetUrl = isTv ? `https://autoembed.co/movie/tmdb/${mediaId}?s=${seasonNum}&e=${episodeNum}` : `https://autoembed.co/movie/tmdb/${mediaId}`;
+                    }
+                } else {
+                    // سيرفرات البث الاحترافية أونلاين عند رفع الموقع على استضافة ودومين رسمي
+                    if (serverKey === 'server1') {
+                        targetUrl = isTv ? `https://vidsrcme.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.ru/embed/movie?tmdb=${mediaId}`;
+                    } else if (serverKey === 'server2') {
+                        targetUrl = isTv ? `https://vidsrcme.su/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.su/embed/movie?tmdb=${mediaId}`;
+                    } else if (serverKey === 'server3') {
+                        targetUrl = isTv ? `https://vidsrc-me.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc-me.ru/embed/movie?tmdb=${mediaId}`;
+                    }
+                }
+                
+                player.src = targetUrl;
+            }
+
+            document.querySelectorAll('.btn-server').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+        }
+    </script>
+    {% endif %}
+
+</body>
+</html>
