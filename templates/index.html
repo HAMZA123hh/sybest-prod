@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sy-Best - المنصة المميزة</title>
+    <title>Sy-Best - HM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -40,6 +40,25 @@
         .user-menu { display: flex; align-items: center; gap: 10px; }
         .btn-logout, .btn-login { color: #fff; text-decoration: none; font-size: 13px; background: #222; padding: 6px 12px; border-radius: 4px; white-space: nowrap; transition: 0.2s; }
         .btn-logout:hover, .btn-login:hover { background: #333; }
+        
+        /* زر VIP الذهبي الجديد */
+        .btn-vip { 
+            color: #000; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffb300, #fcc200); 
+            padding: 6px 14px; 
+            border-radius: 4px; 
+            white-space: nowrap; 
+            transition: 0.2s;
+            box-shadow: 0 0 10px rgba(255, 179, 0, 0.4);
+        }
+        .btn-vip:hover { 
+            background: linear-gradient(45deg, #fcc200, #ffb300);
+            box-shadow: 0 0 15px rgba(255, 179, 0, 0.7);
+            transform: scale(1.02);
+        }
         
         .btn-feedback { color: #ccc; text-decoration: none; font-size: 12px; background: #1a1a1a; padding: 6px 12px; border-radius: 20px; border: 1px solid #333; white-space: nowrap; cursor: pointer; transition: 0.2s; }
         .btn-feedback:hover { background: #e50914; color: #fff; border-color: #e50914; }
@@ -115,8 +134,8 @@
         @media(min-width: 768px) { .hero-content { padding: 0 40px; margin-bottom: 40px; } }
         
         .hero-badge { background: #e50914; color: #fff; font-size: 9px; font-weight: bold; padding: 3px 6px; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
-        .hero-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        @media(min-width: 768px) { .hero-title { font-size: 30px; margin-bottom: 10px; } }
+        .hero-slider .hero-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        @media(min-width: 768px) { .hero-slider .hero-title { font-size: 30px; margin-bottom: 10px; } }
         
         .hero-overview { font-size: 11px; color: #ccc; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; line-height: 1.4; }
         @media(min-width: 768px) { .hero-overview { font-size: 14px; margin-bottom: 20px; } }
@@ -155,6 +174,10 @@
 
         <div class="user-menu">
             {% if current_user.is_authenticated %}
+                {# التحقق: إذا لم يكن المستخدم VIP وليس مسؤولاً، يظهر له زر الاشتراك الملكي #}
+                {% if current_user.subscription != 'vip' and not current_user.is_admin %}
+                    <a href="/pay" class="btn-vip"><i class="fa-solid fa-crown"></i> تفعيل VIP</a>
+                {% endif %}
                 <a href="/logout" class="btn-logout">تسجيل الخروج</a>
             {% else %}
                 <a href="/login" class="btn-login">تسجيل الدخول / الاشتراك</a>
@@ -174,7 +197,7 @@
 
     <div class="genres-bar" id="genresBar">
         <button class="genre-btn active" onclick="filterGenre('all', this)">جميع الفئات</button>
-        <button class="genre-btn" onclick="filterGenre('28', this)">أكشن</button>
+        <button class="genre-btn" onclick="filterGenre('28', this)">أشن</button>
         <button class="genre-btn" onclick="filterGenre('35', this)">كوميديا</button>
         <button class="genre-btn" onclick="filterGenre('27', this)">رعب</button>
         <button class="genre-btn" onclick="filterGenre('18', this)">دراما</button>
@@ -211,7 +234,6 @@
         let currentTab = 'all';
         let currentGenre = '';
 
-        // جلب البيانات ديناميكياً بحسب الفئة المحددة والصفحة
         async function fetchMedia() {
             let url = `/api/movies?page=${currentPage}`;
             
@@ -241,7 +263,6 @@
             }
         }
 
-        // رندرة الكروت داخل الشبكة بشكل متجاوب
         function displayCards(items, isTv) {
             const grid = document.getElementById('moviesGrid');
             grid.innerHTML = '';
@@ -278,7 +299,6 @@
             document.getElementById('prevPageBtn').disabled = currentPage === 1;
         }
 
-        // رندرة البانر العلوي المميز
         function loadHeroSlider(item, isTv) {
             const wrapper = document.getElementById('heroWrapper');
             const slider = document.getElementById('heroSlider');
@@ -306,7 +326,6 @@
             }
         }
 
-        // فلاتر الأقسام الرئيسية
         function filterCategory(tab, btn) {
             currentTab = tab;
             currentPage = 1;
@@ -316,7 +335,6 @@
             fetchMedia();
         }
 
-        // فلاتر التصنيفات الفرعية
         function filterGenre(genreId, btn) {
             currentGenre = genreId;
             currentPage = 1;
@@ -325,7 +343,6 @@
             fetchMedia();
         }
 
-        // التنقل بين الصفحات
         function changePage(direction) {
             currentPage += direction;
             if (currentPage < 1) currentPage = 1;
@@ -333,7 +350,6 @@
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
-        // شريط البحث المباشر (Live Search)
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
 
@@ -375,14 +391,12 @@
             }
         });
 
-        // إغلاق قائمة البحث عند الضغط خارجها
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-container')) {
                 searchResults.style.display = 'none';
             }
         });
 
-        // بدء التشغيل التلقائي عند التحميل الأول للموقع
         window.onload = () => {
             fetchMedia();
         };
