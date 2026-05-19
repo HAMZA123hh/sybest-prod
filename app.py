@@ -24,8 +24,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    subscription = db.Column(db.String(20), default='free') # free, pending, vip
-    expire_date = db.Column(db.DateTime, nullable=True)
+    subscription = db.Column(db.String(20), default='vip') # يبدأ بـ vip للاستفادة من الفترة التجريبية
+    expire_date = db.Column(db.DateTime, nullable=True) # سيتم تعيينه لـ 24 ساعة عند التسجيل
     is_admin = db.Column(db.Boolean, default=False)
 
 class PaymentRequest(db.Model):
@@ -33,6 +33,7 @@ class PaymentRequest(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     method = db.Column(db.String(50), nullable=False)
     transaction_id = db.Column(db.String(100), unique=True, nullable=False)
+    plan_type = db.Column(db.String(20), default='monthly') # جديد: تحديد الباقة (monthly أو yearly)
     status = db.Column(db.String(20), default='pending') # pending, approved, rejected
     username = db.Column(db.String(150))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -103,7 +104,18 @@ def register():
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
         
         is_first = User.query.count() == 0
-        new_user = User(username=username, email=email, password=hashed_pw, is_admin=is_first)
+        
+        # عند التسجيل: يحصل المستخدم على باقة vip صالحة لمدة 24 ساعة مجاناً
+        trial_expire = datetime.utcnow() + timedelta(hours=24)
+        
+        new_user = User(
+            username=username, 
+            email=email, 
+            password=hashed_pw, 
+            is_admin=is_first,
+            subscription='vip' if not is_first else 'vip', # الأدمن أيضاً تجريبي أو متاح دائماً
+            expire_date=trial_expire
+        )
         
         db.session.add(new_user)
         db.session.commit()
@@ -111,7 +123,7 @@ def register():
         if is_first:
             flash('تم إنشاء الحساب الأول كمدير للموقع بنجاح! يرجى تسجيل الدخول.', 'success')
         else:
-            flash('تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.', 'success')
+            flash('تم إنشاء حسابك بنجاح! حصلت على تجربة مجانية لمدة 24 ساعة.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -148,6 +160,7 @@ def pay():
             return redirect(url_for('home'))
             
         method = request.form.get('method')
+        plan_type = request.form.get('plan_type') # استقبال نوع الباقة (monthly أو yearly)
         transaction_id = request.form.get('transaction_id').strip()
         
         if not transaction_id:
@@ -159,7 +172,13 @@ def pay():
             flash('رقم العملية هذا تم إرساله مسبقاً!', 'error')
             return redirect(url_for('pay'))
             
-        new_payment = PaymentRequest(user_id=current_user.id, method=method, transaction_id=transaction_id, username=current_user.username)
+        new_payment = PaymentRequest(
+            user_id=current_user.id, 
+            method=method, 
+            plan_type=plan_type,
+            transaction_id=transaction_id, 
+            username=current_user.username
+        )
         current_user.subscription = 'pending'
         db.session.add(new_payment)
         db.session.commit()
@@ -220,20 +239,25 @@ def search_media(query):
 
 @app.route('/movie/<string:movie_id>')
 def movie_detail(movie_id):
+    # حماية المشاهدة: إذا لم يكن مسجلاً، أو مسجلاً وحسابه مجاني (انتهت الـ 24 ساعة أو اشتراكه)، يتم توجيهه للاشتراك
+    if not current_user.is_authenticated or current_user.subscription == 'free':
+        flash('انتهت الفترة التجريبية أو باقتك الحالية مجانية. يرجى الاشتراك لمتابعة المشاهدة!', 'error')
+        return redirect(url_for('pay'))
+
     if current_user.is_authenticated and current_user.subscription == 'vip' and current_user.expire_date:
         if datetime.utcnow() > current_user.expire_date:
             current_user.subscription = 'free'
             current_user.expire_date = None
             db.session.commit()
+            flash('انتهت مدة اشتراكك/الفترة التجريبية! يرجى التجديد للاستمرار.', 'error')
+            return redirect(url_for('pay'))
             
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&language=ar-SA"
     movie_info = requests.get(url, timeout=15).json() if requests.get(url).status_code == 200 else {}
     
-    # تحويل ذكي ومتكيف بالكامل بحسب بيئة التشغيل مع إجبار جلب الترجمة العربية أونلاين
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
-        embed_url = "//vidsrc.pm/embed/movie/{movie_id}"  # سيرفر التطوير المحلي المفتوح
+        embed_url = "//vidsrc.pm/embed/movie/{movie_id}"  
     else:
-        # تمت إضافة sub_language=ar هنا لضمان الترجمة العربية للأفلام
         embed_url = "//vidsrc.xyz/embed/movie?tmdb={movie_id}&sub_language=ar" 
         
     return render_template('movie.html', embed_url=embed_url, is_tv=False, media=movie_info)
@@ -242,11 +266,17 @@ def movie_detail(movie_id):
 @app.route('/tv/<string:tv_id>')
 @app.route('/tv/<string:tv_id>/<int:season>/<int:episode>')
 def tv_detail(tv_id, season=1, episode=1):
+    if not current_user.is_authenticated or current_user.subscription == 'free':
+        flash('انتهت الفترة التجريبية أو باقتك الحالية مجانية. يرجى الاشتراك لمتابعة المشاهدة!', 'error')
+        return redirect(url_for('pay'))
+
     if current_user.is_authenticated and current_user.subscription == 'vip' and current_user.expire_date:
         if datetime.utcnow() > current_user.expire_date:
             current_user.subscription = 'free'
             current_user.expire_date = None
             db.session.commit()
+            flash('انتهت مدة اشتراكك/الفترة التجريبية! يرجى التجديد للاستمرار.', 'error')
+            return redirect(url_for('pay'))
             
     url = f"https://api.themoviedb.org/3/tv/{tv_id}?api_key={API_KEY}&language=ar-SA"
     tv_info = requests.get(url, timeout=15).json() if requests.get(url).status_code == 200 else {}
@@ -273,11 +303,9 @@ def tv_detail(tv_id, season=1, episode=1):
             next_season = None
             next_episode = None
 
-    # تحويل ذكي ومتكيف بحسب بيئة التشغيل للمسلسلات مع جلب الترجمة العربية أونلاين
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
         embed_url = "//vidsrc.pm/embed/tv/{tv_id}/{season}/{episode}"
     else:
-        # تمت إضافة sub_language=ar هنا لضمان الترجمة العربية للمسلسلات
         embed_url = "//vidsrc.net/embed/tv?tmdb={tv_id}&season={season}&episode={episode}&sub_language=ar"
         
     return render_template(
@@ -313,7 +341,11 @@ def admin_panel():
                     payment_req.status = 'approved'
                     if user:
                         user.subscription = 'vip'
-                        user.expire_date = datetime.utcnow() + timedelta(days=30)
+                        # الفحص والتمييز الذكي بين الباقة السنوية والشهرية
+                        if payment_req.plan_type == 'yearly':
+                            user.expire_date = datetime.utcnow() + timedelta(days=365)
+                        else:
+                            user.expire_date = datetime.utcnow() + timedelta(days=30)
                 elif action == 'reject':
                     payment_req.status = 'rejected'
                     if user:
