@@ -347,4 +347,5 @@ def secret_reset(username, new_password):
     return "<h1>❌ هذا المستخدم غير موجود!</h1>", 404
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)
