@@ -8,7 +8,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_super_secret_key_12345'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+
+# جلب الرابط وإصلاحه ليتوافق مع Postgres الحديثة في SQLAlchemy
+database_uri = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+if database_uri and database_uri.startswith("postgres://"):
+    database_uri = database_uri.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # مفتاح الـ API الخاص بـ TMDB
@@ -113,7 +119,7 @@ def register():
             email=email, 
             password=hashed_pw, 
             is_admin=is_first,
-            subscription='vip' if not is_first else 'vip', # الأدمن أيضاً تجريبي أو متاح دائماً
+            subscription='vip',
             expire_date=trial_expire
         )
         
@@ -239,7 +245,6 @@ def search_media(query):
 
 @app.route('/movie/<string:movie_id>')
 def movie_detail(movie_id):
-    # حماية المشاهدة: إذا لم يكن مسجلاً، أو مسجلاً وحسابه مجاني (انتهت الـ 24 ساعة أو اشتراكه)، يتم توجيهه للاشتراك
     if not current_user.is_authenticated or current_user.subscription == 'free':
         flash('انتهت الفترة التجريبية أو باقتك الحالية مجانية. يرجى الاشتراك لمتابعة المشاهدة!', 'error')
         return redirect(url_for('pay'))
@@ -256,9 +261,9 @@ def movie_detail(movie_id):
     movie_info = requests.get(url, timeout=15).json() if requests.get(url).status_code == 200 else {}
     
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
-        embed_url = "//vidsrc.pm/embed/movie/{movie_id}"  
+        embed_url = f"//vidsrc.pm/embed/movie/{movie_id}"  
     else:
-        embed_url = "//vidsrc.xyz/embed/movie?tmdb={movie_id}&sub_language=ar" 
+        embed_url = f"//vidsrc.xyz/embed/movie?tmdb={movie_id}&sub_language=ar" 
         
     return render_template('movie.html', embed_url=embed_url, is_tv=False, media=movie_info)
 
@@ -304,9 +309,9 @@ def tv_detail(tv_id, season=1, episode=1):
             next_episode = None
 
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
-        embed_url = "//vidsrc.pm/embed/tv/{tv_id}/{season}/{episode}"
+        embed_url = f"//vidsrc.pm/embed/tv/{tv_id}/{season}/{episode}"
     else:
-        embed_url = "//vidsrc.net/embed/tv?tmdb={tv_id}&season={season}&episode={episode}&sub_language=ar"
+        embed_url = f"//vidsrc.net/embed/tv?tmdb={tv_id}&season={season}&episode={episode}&sub_language=ar"
         
     return render_template(
         'movie.html', 
