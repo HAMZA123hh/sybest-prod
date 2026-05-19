@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ media.title if media.title else media.name }} - Sy-Best Player</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
     <style>
         body { background-color: #141414; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; text-align: center; direction: rtl; }
         .navbar { background-color: #000; border-bottom: 3px solid #e50914; padding: 15px; text-align: right; }
