@@ -167,50 +167,49 @@
     </div>
 
     {% if current_user.is_authenticated and current_user.subscription == 'vip' %}
-    <script>
-        const defaultUrl = "{{ embed_url }}";
-        const isTv = {{ 'true' if is_tv else 'false' }};
+   <script>
+    const defaultUrl = "{{ embed_url }}";
+    const isTv = {{ 'true' if is_tv else 'false' }};
+    
+    const mediaId = "{{ media.id }}";
+    const seasonNum = "{{ current_season if is_tv else 1 }}";
+    const episodeNum = "{{ current_episode if is_tv else 1 }}";
+
+    function switchDomain(buttonElement, serverKey) {
+        const player = document.getElementById('syBestMainPlayer');
+        const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
         
-        const mediaId = "{{ media.id }}";
-        const seasonNum = "{{ current_season if is_tv else 1 }}";
-        const episodeNum = "{{ current_episode if is_tv else 1 }}";
-
-        function switchDomain(buttonElement, serverKey) {
-            const player = document.getElementById('syBestMainPlayer');
-            const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        if (serverKey === 'default') {
+            player.src = defaultUrl;
+        } else {
+            let targetUrl = "";
             
-            if (serverKey === 'default') {
-                player.src = defaultUrl;
-            } else {
-                let targetUrl = "";
-                
-                if (isLocalhost) {
-                    // سيرفرات التطوير المحلي المستقرة (تخطي حظر X-Frame-Options)
-                    if (serverKey === 'server1') {
-                        targetUrl = isTv ? `//vidsrc.pm/embed/tv/${mediaId}/${seasonNum}/${episodeNum}` : `https://vidsrc.pm/embed/movie/${mediaId}`;
-                    } else if (serverKey === 'server2') {
-                        targetUrl = isTv ? `//vidsrc.xyz/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc.xyz/embed/movie?tmdb=${mediaId}`;
-                    } else if (serverKey === 'server3') {
-                        targetUrl = isTv ? `//autoembed.co/movie/tmdb/${mediaId}?s=${seasonNum}&e=${episodeNum}` : `https://autoembed.co/movie/tmdb/${mediaId}`;
-                    }
-                } else {
-                    // سيرفرات البث الاحترافية أونلاين عند رفع الموقع على استضافة ودومين رسمي
-                    if (serverKey === 'server1') {
-                        targetUrl = isTv ? `//vidsrcme.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.ru/embed/movie?tmdb=${mediaId}`;
-                    } else if (serverKey === 'server2') {
-                        targetUrl = isTv ? `//vidsrcme.su/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrcme.su/embed/movie?tmdb=${mediaId}`;
-                    } else if (serverKey === 'server3') {
-                        targetUrl = isTv ? `//vidsrc-me.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `https://vidsrc-me.ru/embed/movie?tmdb=${mediaId}`;
-                    }
+            if (isLocalhost) {
+                if (serverKey === 'server1') {
+                    targetUrl = isTv ? `//vidsrc.pm/embed/tv/${mediaId}/${seasonNum}/${episodeNum}` : `//vidsrc.pm/embed/movie/${mediaId}`;
+                } else if (serverKey === 'server2') {
+                    targetUrl = isTv ? `//vidsrc.xyz/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `//vidsrc.xyz/embed/movie?tmdb=${mediaId}`;
+                } else if (serverKey === 'server3') {
+                    targetUrl = isTv ? `//autoembed.co/movie/tmdb/${mediaId}?s=${seasonNum}&e=${episodeNum}` : `//autoembed.co/movie/tmdb/${mediaId}`;
                 }
-                
-                player.src = targetUrl;
+            } else {
+                // روابط البث الاحترافية مصححة بالكامل (// بدلاً من https://)
+                if (serverKey === 'server1') {
+                    targetUrl = isTv ? `//vidsrcme.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `//vidsrcme.ru/embed/movie?tmdb=${mediaId}`;
+                } else if (serverKey === 'server2') {
+                    targetUrl = isTv ? `//vidsrcme.su/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `//vidsrcme.su/embed/movie?tmdb=${mediaId}`;
+                } else if (serverKey === 'server3') {
+                    targetUrl = isTv ? `//vidsrc-me.ru/embed/tv?tmdb=${mediaId}&season=${seasonNum}&episode=${episodeNum}` : `//vidsrc-me.ru/embed/movie?tmdb=${mediaId}`;
+                }
             }
-
-            document.querySelectorAll('.btn-server').forEach(btn => btn.classList.remove('active'));
-            buttonElement.classList.add('active');
+            
+            player.src = targetUrl;
         }
-    </script>
+
+        document.querySelectorAll('.btn-server').forEach(btn => btn.classList.remove('active'));
+        buttonElement.classList.add('active');
+    }
+</script>
     {% endif %}
 
 </body>
