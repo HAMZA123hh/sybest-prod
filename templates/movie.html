@@ -49,6 +49,11 @@
         .btn-next-ep:hover { background: #218838; }
         .current-badge { background: #222; padding: 6px 12px; border-radius: 4px; font-size: 14px; color: #aaa; }
         .current-badge b { color: #fff; }
+        @media (max-width: 600px) {
+    .player-box { height: 250px !important; } /* تصغير المشغل للجوال */
+    .media-details { flex-direction: column; text-align: center; } /* جعل تفاصيل الفيلم تحت بعضها */
+    .episodes-grid { grid-template-columns: 1fr !important; } /* جعل الحلقات عمود واحد */
+}
     </style>
 </head>
 <body>
