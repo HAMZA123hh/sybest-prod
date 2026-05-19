@@ -274,10 +274,10 @@ def tv_detail(tv_id, season=1, episode=1):
 
     # تحويل ذكي ومتكيف بالكامل بحسب بيئة التشغيل للمسلسلات
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
-        embed_url = f"https://vidsrc.pm/embed/tv/{tv_id}/{season}/{episode}"  # سيرفر التطوير المحلي المفتوح
+        embed_url = "//vidsrc.pm/embed/tv/{tv_id}/{season}/{episode}"
     else:
-        embed_url = f"https://vidsrc.xyz/embed/tv?tmdb={tv_id}&season={season}&episode={episode}" # السيرفر الافتراضي المستقر جداً أونلاين
-    
+        # هنا أيضاً استخدمنا // مع vidsrc.net لضمان العمل
+        embed_url = "//vidsrc.net/embed/tv?tmdb={tv_id}&season={season}&episode={episode}"
     return render_template(
         'movie.html', 
         embed_url=embed_url, 
