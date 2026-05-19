@@ -9,6 +9,15 @@
         body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 40px auto; }
         
+        /* أزرار اختيار نوع الباقة */
+        .plan-selection { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .plan-option { background: #1a1a1f; border: 2px solid #242428; padding: 18px; border-radius: 10px; cursor: pointer; text-align: center; transition: 0.3s; color: #eee; }
+        .plan-option .plan-title { font-weight: 700; font-size: 16px; margin-bottom: 5px; display: block; }
+        .plan-option .plan-price { font-size: 13px; color: #a0a0a5; }
+        .plan-option.active { border-color: var(--primary); background: rgba(229,9,20,0.06); }
+        .plan-option.active .plan-title { color: var(--primary); }
+        .plan-option.active .plan-price { color: #fff; }
+
         /* أزرار اختيار وسيلة الدفع */
         .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .pay-option { background: #1f1f23; border: 2px solid #242428; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.3s; color: #aaa; font-weight: 600; }
@@ -28,7 +37,7 @@
         button.submit-btn:hover { background: #e0a800; }
         
         .btn-copy { background: #444; color: #fff; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 12px; }
-        .messages { background: #28a745; color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        .messages { padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center; font-weight: bold; }
 
         /* قسم الأسئلة الشائعة */
         .faq-section { margin-top: 40px; background: #16161a; border: 1px solid #242428; border-radius: 12px; padding: 25px; }
@@ -54,13 +63,24 @@
     <div class="pay-box">
         <h2>👑 Upgrade to VIP Premium</h2>
         
+        <div class="plan-selection">
+            <div class="plan-option active" id="plan-monthly" onclick="selectPlan('monthly', '15,000')">
+                <span class="plan-title">🌙 باقة شهرية</span>
+                <span class="plan-price">15,000 ل.س / 30 يوم</span>
+            </div>
+            <div class="plan-option" id="plan-yearly" onclick="selectPlan('yearly', '150,000')">
+                <span class="plan-title">📅 باقة سنوية (توفير 🔥)</span>
+                <span class="plan-price">150,000 ل.س / 365 يوم</span>
+            </div>
+        </div>
+
         <div class="payment-methods">
             <div class="pay-option active" id="btn-syriatel" onclick="selectMethod('Syriatel Cash')">Syriatel Cash</div>
             <div class="pay-option" id="btn-cham" onclick="selectMethod('Cham Cash')">Cham Cash</div>
         </div>
 
         <div class="info-box">
-            <p style="margin-top:0;">Subscription Fee: 15,000 ل.س / شهرياً</p>
+            <p style="margin-top:0;">قيمة التحويل المطلوبة: <span id="text-fee" style="color: var(--gold); font-weight: bold;">15,000 ل.س</span></p>
             <div class="copy-row" id="row-syriatel">
                 <span>سيريتل كاش: 0988609965</span>
                 <button class="btn-copy" onclick="copyText('0988609965')">Copy</button>
@@ -72,99 +92,66 @@
         </div>
 
         <div class="qr-section" id="qr-cham">
-    <img src="{{ url_for('static', filename='sham.jpg') }}" alt="Cham Cash QR">
-    <p style="color:#000; font-size: 12px; margin-top: 5px;">مسح للدفع عبر شام كاش</p>
-</div>
+            <img src="{{ url_for('static', filename='sham.jpg') }}" alt="Cham Cash QR">
+            <p style="color:#000; font-size: 12px; margin-top: 5px;">مسح للدفع عبر شام كاش</p>
+        </div>
 
         <form method="POST">
+            <input type="hidden" name="plan_type" id="selected_plan" value="monthly">
             <input type="hidden" name="method" id="selected_method" value="Syriatel Cash">
-            <input type="text" name="transaction_id" placeholder="أدخل رقم العملية..." required>
+            
+            <input type="text" name="transaction_id" placeholder="أدخل رقم العملية المرسل بالرسالة..." required>
             <button type="submit" class="submit-btn">إرسال الطلب للتفعيل</button>
         </form>
     </div>
 
     <div class="faq-section">
-
-            <h3>💡 الأسئلة الشائعة والتعليمات (FAQ)</h3>
-
+        <h3>💡 الأسئلة الشائعة والتعليمات (FAQ)</h3>
         
-            <div class="faq-item">
-
-                <div class="faq-question">❓ كم يستغرق تفعيل حسابي بعد إرسال رقم العملية؟</div>
-
-                <p class="faq-answer">تتم مراجعة التحويلات وتفعيل الحسابات يدوياً من قبل الإدارة في فترة تتراوح بين 5 دقائق إلى ساعة كحد أقصى. بمجرد الموافقة، ستتحول حالة حسابك إلى VIP تلقائياً.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ الإنترنت عندي ضعيف جداً، هل سيعمل الموقع بدون تقطيع؟</div>
-
-                <p class="faq-answer">نعم، السيرفرات تدعم جودات متعددة تتكيف تلقائياً مع سرعة خطك. إذا واجهت أي تقطيع، يمكنك ببساطة الضغط على زر الإعدادات (الترس) داخل مشغل الفيديو وخفض الجودة يدوياً لتناسب خطك تماماً.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ هل يستهلك المشغل الكثير من باقة الإنترنت (الميغابايت)؟</div>
-
-                <p class="faq-answer">المشغل يعتمد على تقنية البث الذكي المضغوط والمعد خصيصاً للشبكات المحلية، مما يضمن لك أعلى نقاء في الصورة مع أقل استهلاك ممكن للميغابايت مقارنة بالمواقع الأخرى.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ هل أحتاج إلى تشغيل برنامج VPN لفتح الأفلام؟</div>
-
-                <p class="faq-answer">لا، موقع <b>Sy-Best</b> مستضاف ليعمل مباشرة وبأقصى سرعة داخل سوريا بدون الحاجة لتشغيل أي برامج VPN، بل إن إطفاء الـ VPN يمنحك سرعة استجابة أفضل وسيرفرات أكثر استقراراً.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ كم مدة الاشتراك وماذا يحدث بعد انتهائه؟</div>
-
-                <p class="faq-answer">مدة الاشتراك هي 30 يوماً كاملة تبدأ من لحظة تفعيل الإدارة لحسابك. بعد انتهاء الـ 30 يوماً، سيعود حسابك إلى الوضع المجاني تلقائياً حتى تقوم بالتجديد وإدخال رقم عملية جديد.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ قمت بالتحويل ولكن لم تصلني رسالة برقم العملية، ماذا أفعل؟</div>
-
-                <p class="faq-answer">يمكنك تصوير شاشة عملية التحويل الناجحة من تطبيق "أقرب إليك" وإرسال رقم وتفاصيل التحويل عبر كود العملية التقريبي المتوفر باللقطة، وسيقوم فريق الدعم بمطابقتها وتفعيل حسابك يدوياً.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ ماذا أفعل إذا أدخلت رقم عملية خاطئ بالخطأ؟</div>
-
-                <p class="faq-answer">في حال إدخال رقم عملية خاطئ، سيقوم النظام برفض الطلب تلقائياً في لوحة التحكم. يمكنك ببساطة إعادة تقديم طلب جديد من هذه الصفحة وإدخال رقم العملية الصحيح الوارد في رسالة التحويل الأصلية.</p>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-question">❓ هل يتوفر تطبيق للموبايل أم المشاهدة من المتصفح فقط؟</div>
-
-                <p class="faq-answer">الموقع متوافق بالكامل 100% مع شاشات الموبايل والتابلت والشاشات الذكية (Smart TV) عبر المتصفح مباشرة، وهو مصمم ليكون خفيفاً وسريعاً جداً دون الحاجة لتحميل تطبيقات خارجية قد تبطئ جهازك.</p>
-
-            </div>
-            <div class="faq-item">
-
-                <div class="faq-question">❓ هل يمكنني مشاركة حسابي مع أصدقائي؟</div>
-
-                <p class="faq-answer">الاشتراك مخصص للاستخدام الشخصي على أجهزتك. مشاركة الحساب مع أشخاص متعددين في نفس الوقت قد تؤدي إلى تداخل جلسات المشاهدة أو بطء السيرفر، لذا نوصي بالحفاظ على سرية بياناتك.</p>
-
-            </div>
-
+        <div class="faq-item">
+            <div class="faq-question">❓ هل توجد فترة تجريبية مجانية للموقع؟</div>
+            <p class="faq-answer">نعم! عند إنشاء حساب جديد لأول مرة، يمنحك النظام تلقائياً <b>فترة تجريبية مجانية بالكامل لمدة 24 ساعة</b> لتجربة جودة وسرعة المشاهدة قبل الحاجة للاشتراك.</p>
         </div>
 
+        <div class="faq-item">
+            <div class="faq-question">❓ كم يستغرق تفعيل حسابي بعد إرسال رقم العملية؟</div>
+            <p class="faq-answer">تتم مراجعة التحويلات وتفعيل الحسابات يدوياً من قبل الإدارة في فترة تتراوح بين 5 دقائق إلى ساعة كحد أقصى. بمجرد الموافقة، ستتحول حالة حسابك إلى VIP تلقائياً حسب الباقة المختارة.</p>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ ما هي مدة الصلاحية لكل باقة؟</div>
+            <p class="faq-answer">الباقة الشهرية تمنحك صلاحية مشاهدة لمدة 30 يوماً كاملة، بينما الباقة السنوية توفر لك وصولاً مستمراً لمدة 365 يوماً كاملاً دون انقطاع تبدأ من وقت موافقة الإدارة.</p>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ الإنترنت عندي ضعيف جداً، هل سيعمل الموقع بدون تقطيع؟</div>
+            <p class="faq-answer">نعم، السيرفرات تدعم جودات متعددة تتكيف تلقائياً مع سرعة خطك. إذا واجهت أي تقطيع، يمكنك ببساطة الضغط على زر الإعدادات (الترس) داخل مشغل الفيديو وخفض الجودة يدوياً لتناسب خطك تماماً.</p>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ هل أحتاج إلى تشغيل برنامج VPN لفتح الأفلام؟</div>
+            <p class="faq-answer">لا، موقع <b>Sy-Best</b> مستضاف ليعمل مباشرة وبأقصى سرعة داخل سوريا بدون الحاجة لتشغيل أي برامج VPN، بل إن إطفاء الـ VPN يمنحك سرعة استجابة أفضل وسيرفرات أكثر استقراراً.</p>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ قمت بالتحويل ولكن لم تصلني رسالة برقم العملية، ماذا أفعل؟</div>
+            <p class="faq-answer">يمكنك تصوير شاشة عملية التحويل الناجحة من تطبيق "أقرب إليك" أو تطبيق بنكك وإرسال رقم وتفاصيل التحويل المتوفرة باللقطة، وسيقوم فريق الدعم بمطابقتها وتفعيل حسابك يدوياً.</p>
+        </div>
     </div>
 </div>
 
 <script>
+    // دالة تبديل الباقة (شهري / سنوي)
+    function selectPlan(plan, feeText) {
+        document.getElementById('selected_plan').value = plan;
+        document.getElementById('plan-monthly').classList.toggle('active', plan === 'monthly');
+        document.getElementById('plan-yearly').classList.toggle('active', plan === 'yearly');
+        
+        // تحديث النص المعروض للتكلفة
+        document.getElementById('text-fee').innerText = feeText + ' ل.س';
+    }
+
+    // دالة تبديل وسيلة الدفع
     function selectMethod(method) {
         document.getElementById('selected_method').value = method;
         document.getElementById('btn-syriatel').classList.toggle('active', method === 'Syriatel Cash');
