@@ -220,7 +220,7 @@
                 <div class="flash-msg" style="background: {% if category == 'success' %}var(--success){% else %}var(--danger){% endif %};">
                     {{ message }}
                 </div>
-            </for>
+            {% endfor %}
         {% endif %}
     {% endwith %}
 
@@ -262,7 +262,7 @@
             <tbody>
                 {% for req in payments %}
                 <tr>
-                    <td><b>{{ req.username }}</b></td>
+                    <td><b>{{ req.username or 'مستخدم غير معروف' }}</b></td>
                     <td>
                         {% if req.plan_type == 'yearly' %}
                             <span class="badge badge-plan-yearly">📅 اشتراك سنوي</span>
@@ -304,10 +304,16 @@
             <tbody>
                 {% for fb in feedbacks %}
                 <tr>
-                    <td><b>{{ fb.username }}</b> <span style="color:var(--text-muted); font-size:12px;">(ID: {{ fb.user_id }})</span></td>
-                    <td><span class="badge-type">{{ fb.message_type }}</span></td>
+                    <td><b>{{ fb.username or 'مستخدم غير معروف' }}</b> <span style="color:var(--text-muted); font-size:12px;">(ID: {{ fb.user_id }})</span></td>
+                    <td><span class="badge-type">{{ fb.message_type or 'عام' }}</span></td>
                     <td style="color: #00bcd4; font-size: 14px; font-weight: 600; white-space: pre-wrap; word-break: break-word;">{{ fb.content }}</td>
-                    <td style="font-size: 13px; color: var(--text-muted);">{{ fb.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td style="font-size: 13px; color: var(--text-muted);">
+                        {% if fb.date_created %}
+                            {{ fb.date_created.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
                     <td style="text-align: left;">
                         <form method="POST" style="display:inline;">
                             <input type="hidden" name="action" value="delete_feedback">
@@ -341,7 +347,7 @@
                 {% for user in users %}
                 <tr>
                     <td style="color: var(--text-muted); font-family: monospace;">#{{ user.id }}</td>
-                    <td><b>{{ user.username }}</b> {% if user.is_admin %}<span style="color:var(--primary); font-size:11px; font-weight:bold; margin-right:50px;">[مدير]</span>{% endif %}</td>
+                    <td><b>{{ user.username }}</b> {% if user.is_admin %}<span style="color:var(--primary); font-size:11px; font-weight:bold; margin-right:5px;">[مدير]</span>{% endif %}</td>
                     <td style="color: #e1e1e6;">{{ user.email }}</td>
                     <td>
                         {% if user.subscription == 'vip' %}
@@ -353,7 +359,11 @@
                         {% endif %}
                     </td>
                     <td style="font-family: monospace; font-size: 13px; color: {% if user.subscription == 'vip' %}#fff{% else %}var(--text-muted){% endif %};">
-                        {{ user.expire_date.strftime('%Y-%m-%d %H:%M') if user.expire_date else 'غير محدد' }}
+                        {% if user.expire_date %}
+                            {{ user.expire_date.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            <span style="color: #666;">غير محدد (دائم)</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
