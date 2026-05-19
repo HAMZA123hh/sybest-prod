@@ -231,9 +231,9 @@ def movie_detail(movie_id):
     
     # تحويل ذكي ومتكيف بالكامل بحسب بيئة التشغيل
     if request.host.startswith('127.0.0.1') or request.host.startswith('localhost'):
-        embed_url = f"https://vidsrc.pm/embed/movie/{movie_id}"  # سيرفر التطوير المحلي المفتوح
+        embed_url = "//vidsrc.pm/embed/movie/{movie_id}"  # سيرفر التطوير المحلي المفتوح
     else:
-        embed_url = f"https://vidsrc.xyz/embed/movie?tmdb={movie_id}" # السيرفر الافتراضي المستقر جداً أونلاين
+        embed_url = "//vidsrc.xyz/embed/movie?tmdb={movie_id}" # السيرفر الافتراضي المستقر جداً أونلاين
         
     return render_template('movie.html', embed_url=embed_url, is_tv=False, media=movie_info)
 
